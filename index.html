@@ -61,7 +61,7 @@
       map.on("click", "water-layer", (e) => {
         const water_coordinates = e.features[0].geometry.coordinates.slice();
         new maplibregl.Popup()
-          .setLngLat(watercoordinates)
+          .setLngLat(water_coordinates)
           .setHTML(e.features[0].properties.osm_id)
           .addTo(map);
       });
