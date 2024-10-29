@@ -34,20 +34,42 @@
           type: "geojson",
           data: "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/main/data/water.geojson",
         });
+        map.addSource("toilets", {
+          type: "geojson",
+          data: "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/main/data/toilets.geojson",
+        });
         map.addLayer({
           id: "water-layer",
           type: "circle",
           source: "water",
           paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 12, 4],
             "circle-color": "#0062ff",
+          },
+        });
+        map.addLayer({
+          id: "toilets-layer",
+          type: "circle",
+          source: "toilets",
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 12, 4],
+            "circle-color": "#eb4034",
           },
         });
       });
 
       map.on("click", "water-layer", (e) => {
-        const coordinates = e.features[0].geometry.coordinates.slice();
+        const water_coordinates = e.features[0].geometry.coordinates.slice();
         new maplibregl.Popup()
-          .setLngLat(coordinates)
+          .setLngLat(watercoordinates)
+          .setHTML(e.features[0].properties.osm_id)
+          .addTo(map);
+      });
+
+      map.on("click", "toilets-layer", (e) => {
+        const toilets_coordinates = e.features[0].geometry.coordinates.slice();
+        new maplibregl.Popup()
+          .setLngLat(toilets_coordinates)
           .setHTML(e.features[0].properties.osm_id)
           .addTo(map);
       });
