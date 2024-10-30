@@ -1,0 +1,103 @@
+<html>
+  <head>
+    <title>Water Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://unpkg.com/maplibre-gl@^4.7.1/dist/maplibre-gl.js"></script>
+    <link
+      href="https://unpkg.com/maplibre-gl@^4.7.1/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body,
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map = new maplibregl.Map({
+        container: "map", // container id
+        style: "https://tiles.openfreemap.org/styles/positron", // style URL
+        center: [8, 46.7], // starting position [lng, lat]
+        zoom: 7, // starting zoom
+      });
+
+      map.on("load", () => {
+        map.addSource("water-tiles", {
+          type: "vector",
+          tiles: [
+            "https://wrynearson.github.io/watermap/data/water_tiles/{z}/{x}/{y}.pbf",
+          ], // URL pattern for your .pbf tiles
+          minzoom: 0,
+          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
+          maxzoom: 8,
+        });
+
+        map.addSource("toilet-tiles", {
+          type: "vector",
+          tiles: [
+            "https://wrynearson.github.io/watermap/data/toilet_tiles/{z}/{x}/{y}.pbf",
+          ], // URL pattern for your .pbf tiles
+          minzoom: 0,
+          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
+          maxzoom: 8,
+        });
+
+        map.addLayer({
+          id: "water-tile-layer",
+          type: "circle", // Change this based on your data type
+          source: "water-tiles",
+          "source-layer": "water", // Replace with the actual layer name in your PBF
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
+            "circle-color": "#0062ff",
+          },
+        });
+
+        map.addLayer({
+          id: "toilet-tile-layer",
+          type: "circle", // Change this based on your data type
+          source: "toilet-tiles",
+          "source-layer": "toilets", // Replace with the actual layer name in your PBF
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
+            "circle-color": "#eb4034",
+          },
+        });
+      });
+
+      map.on("click", "water-tile-layer", (e) => {
+        const water_coordinates = e.features[0].geometry.coordinates.slice();
+        new maplibregl.Popup()
+          .setLngLat(water_coordinates)
+          .setHTML(e.features[0].properties.osm_id)
+          .addTo(map);
+      });
+
+      map.on("click", "toilet-tile-layer", (e) => {
+        const toilet_coordinates = e.features[0].geometry.coordinates.slice();
+        new maplibregl.Popup()
+          .setLngLat(toilet_coordinates)
+          .setHTML(e.features[0].properties.osm_id)
+          .addTo(map);
+      });
+
+      // Add geolocate control to the map.
+      map.addControl(
+        new maplibregl.GeolocateControl({
+          positionOptions: {
+            enableHighAccuracy: true,
+          },
+          trackUserLocation: true,
+        })
+      );
+    </script>
+  </body>
+</html>
