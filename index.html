@@ -30,30 +30,20 @@
       });
 
       map.on("load", () => {
-        // map.addSource("water", {
-        //   type: "geojson",
-        //   data: "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/main/data/water.geojson",
-        // });
-
         map.addSource("water-tiles", {
           type: "vector",
           tiles: [
-            "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/use-tiles/data/water_tiles/{z}/{x}/{y}.pbf",
+            "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/main/data/water_tiles/{z}/{x}/{y}.pbf",
           ], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 8,
         });
 
-        // map.addSource("toilets", {
-        //   type: "geojson",
-        //   data: "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/main/data/toilets.geojson",
-        // });
-
         map.addSource("toilet-tiles", {
           type: "vector",
           tiles: [
-            "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/use-tiles/data/toilet_tiles/{z}/{x}/{y}.pbf",
+            "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/main/data/toilet_tiles/{z}/{x}/{y}.pbf",
           ], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
