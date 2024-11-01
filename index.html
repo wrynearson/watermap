@@ -50,6 +50,14 @@
           maxzoom: 8,
         });
 
+        map.addSource("more-tiles", {
+          type: "vector",
+          tiles: ["/data/tiles2/{z}/{x}/{y}.pbf"], // URL pattern for your .pbf tiles
+          minzoom: 0,
+          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
+          maxzoom: 16,
+        });
+
         map.addLayer({
           id: "water-tile-layer",
           type: "circle", // Change this based on your data type
@@ -69,6 +77,17 @@
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
             "circle-color": "#eb4034",
+          },
+        });
+
+        map.addLayer({
+          id: "more-tiles",
+          type: "circle", // Change this based on your data type
+          source: "more-tiles",
+          "source-layer": "water_plus", // Replace with the actual layer name in your PBF
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
+            "circle-color": "#ebb134",
           },
         });
       });
