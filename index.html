@@ -52,10 +52,11 @@
 
         map.addSource("more-tiles", {
           type: "vector",
-          tiles: ["/data/tiles2/{z}/{x}/{y}.pbf"], // URL pattern for your .pbf tiles
+          tiles:
+            "https://wrynearson.github.io/watermap/data/tiles2/{z}/{x}/{y}.pbf", // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
-          maxzoom: 16,
+          maxzoom: 14,
         });
 
         map.addLayer({
@@ -81,7 +82,7 @@
         });
 
         map.addLayer({
-          id: "more-tiles",
+          id: "more-tiles-water",
           type: "circle", // Change this based on your data type
           source: "more-tiles",
           "source-layer": "water_plus", // Replace with the actual layer name in your PBF
