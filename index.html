@@ -29,84 +29,131 @@
         zoom: 7, // starting zoom
       });
 
+      const waterColor = "#0062ff";
+      const toiletColor = "#eb4034";
+
       map.on("load", () => {
         map.addSource("water-tiles", {
           type: "vector",
           tiles: [
-            "https://wrynearson.github.io/watermap/data/water_tiles/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles
-          minzoom: 0,
-          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
-          maxzoom: 8,
-        });
-
-        map.addSource("toilet-tiles", {
-          type: "vector",
-          tiles: [
-            "https://wrynearson.github.io/watermap/data/toilet_tiles/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles
-          minzoom: 0,
-          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
-          maxzoom: 8,
-        });
-
-        map.addSource("more-tiles", {
-          type: "vector",
-          tiles: [
-            "https://wrynearson.github.io/watermap/data/tiles2/{z}/{x}/{y}.pbf",
+            "https://raw.githubusercontent.com/wrynearson/watermap/bace090af1f458a485340f4cb33a8c7781fc8c3d/data/water_tiles/{z}/{x}/{y}.pbf",
           ], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
         });
 
+        map.addSource("toilet-tiles", {
+          type: "vector",
+          tiles: [
+            "https://raw.githubusercontent.com/wrynearson/watermap/bace090af1f458a485340f4cb33a8c7781fc8c3d/data/toilet_tiles/{z}/{x}/{y}.pbf",
+          ], // URL pattern for your .pbf tiles
+          minzoom: 0,
+          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
+          maxzoom: 14,
+        });
+
+        // ADD WATER TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
+
         map.addLayer({
-          id: "water-tile-layer",
+          id: "water-lines",
+          type: "line", // Change this based on your data type
+          source: "water-tiles",
+          "source-layer": "lines", // Replace with the actual layer name in your PBF
+          paint: {
+            "line-opacity": 0.5,
+            "line-color": waterColor,
+          },
+        });
+
+        map.addLayer({
+          id: "water-multipolygons",
+          type: "fill", // Change this based on your data type
+          source: "water-tiles",
+          "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+          paint: {
+            "fill-opacity": 0.3,
+            "fill-color": waterColor,
+          },
+        });
+
+        map.addLayer({
+          id: "water-points",
           type: "circle", // Change this based on your data type
           source: "water-tiles",
-          "source-layer": "water", // Replace with the actual layer name in your PBF
+          "source-layer": "points", // Replace with the actual layer name in your PBF
           paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
-            "circle-color": "#0062ff",
+            "circle-radius": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              10,
+              1.5,
+              16,
+              4,
+            ],
+            "circle-color": waterColor,
+          },
+        });
+
+        // ADD TOILET TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
+
+        map.addLayer({
+          id: "toilet-lines",
+          type: "line", // Change this based on your data type
+          source: "toilet-tiles",
+          "source-layer": "lines", // Replace with the actual layer name in your PBF
+          paint: {
+            "line-opacity": 0.5,
+            "line-color": toiletColor,
           },
         });
 
         map.addLayer({
-          id: "toilet-tile-layer",
+          id: "toilet-multipolygons",
+          type: "fill", // Change this based on your data type
+          source: "toilet-tiles",
+          "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+          paint: {
+            "fill-opacity": 0.3,
+            "fill-color": toiletColor,
+          },
+        });
+
+        map.addLayer({
+          id: "toilet-points",
           type: "circle", // Change this based on your data type
           source: "toilet-tiles",
-          "source-layer": "toilets", // Replace with the actual layer name in your PBF
+          "source-layer": "points", // Replace with the actual layer name in your PBF
           paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
-            "circle-color": "#eb4034",
+            "circle-radius": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              10,
+              1.5,
+              16,
+              4,
+            ],
+            "circle-color": toiletColor,
           },
         });
 
-        map.addLayer({
-          id: "more-tiles-water",
-          type: "fill", // Change this based on your data type
-          source: "more-tiles",
-          "source-layer": "water_plus", // Replace with the actual layer name in your PBF
-          paint: {
-            "fill-color": "#0062ff",
-          },
+        map.on("click", "water-points", (e) => {
+          const water_coordinates = e.features[0].geometry.coordinates.slice();
+          new maplibregl.Popup()
+            .setLngLat(water_coordinates)
+            .setHTML(e.features[0].properties.osm_id)
+            .addTo(map);
         });
-      });
 
-      map.on("click", "water-tile-layer", (e) => {
-        const water_coordinates = e.features[0].geometry.coordinates.slice();
-        new maplibregl.Popup()
-          .setLngLat(water_coordinates)
-          .setHTML(e.features[0].properties.osm_id)
-          .addTo(map);
-      });
-
-      map.on("click", "toilet-tile-layer", (e) => {
-        const toilet_coordinates = e.features[0].geometry.coordinates.slice();
-        new maplibregl.Popup()
-          .setLngLat(toilet_coordinates)
-          .setHTML(e.features[0].properties.osm_id)
-          .addTo(map);
+        map.on("click", "toilet-points", (e) => {
+          const toilet_coordinates = e.features[0].geometry.coordinates.slice();
+          new maplibregl.Popup()
+            .setLngLat(toilet_coordinates)
+            .setHTML(e.features[0].properties.osm_id)
+            .addTo(map);
+        });
       });
 
       // Add geolocate control to the map.
