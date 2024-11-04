@@ -50,14 +50,23 @@
           maxzoom: 8,
         });
 
-        map.addSource("more-tiles", {
+        map.addSource("even-more-tiles", {
           type: "vector",
-          tiles: [
-            "https://wrynearson.github.io/watermap/data/tiles2/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles
+          tiles: ["./data/tiles3/{z}/{x}/{y}.pbf"], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
+        });
+
+        map.addLayer({
+          id: "hello",
+          type: "circle", // Change this based on your data type
+          source: "even-more-tiles",
+          "source-layer": "points", // Replace with the actual layer name in your PBF
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 1, 16, 4],
+            "circle-color": "#f542a1",
+          },
         });
 
         map.addLayer({
@@ -81,19 +90,9 @@
             "circle-color": "#eb4034",
           },
         });
-
-        map.addLayer({
-          id: "more-tiles-water",
-          type: "fill", // Change this based on your data type
-          source: "more-tiles",
-          "source-layer": "water_plus", // Replace with the actual layer name in your PBF
-          paint: {
-            "fill-color": "#0062ff",
-          },
-        });
       });
 
-      map.on("click", "water-tile-layer", (e) => {
+      map.on("click", "more-tiles-water", (e) => {
         const water_coordinates = e.features[0].geometry.coordinates.slice();
         new maplibregl.Popup()
           .setLngLat(water_coordinates)
