@@ -17,10 +17,23 @@
       #map {
         height: 100%;
       }
+      #toggle-layer {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 5px;
+      }
     </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div id="map">
+      <div id="toggle-layer">
+        <input type="checkbox" id="water-toggle" checked /> Show Water
+        <input type="checkbox" id="toilet-toggle" checked /> Show Toilets
+        <input type="checkbox" id="bench-toggle" /> Show Benches
+    </div>
     <script>
       var map = new maplibregl.Map({
         container: "map", // container id
@@ -193,6 +206,10 @@
           },
         });
 
+        map.setLayoutProperty('water-points', 'visibility', 'visible');
+        map.setLayoutProperty('toilet-points', 'visibility', 'visible');
+        map.setLayoutProperty('bench-points', 'visibility', 'none');
+
         map.on("click", "water-points", (e) => {
           const water_coordinates = e.features[0].geometry.coordinates.slice();
           new maplibregl.Popup()
@@ -227,6 +244,27 @@
           trackUserLocation: true,
         })
       );
+      
+      const bench_checkbox = document.getElementById('bench-toggle');
+      
+      // Add event listener for the bench checkbox
+      bench_checkbox.addEventListener('change', function() {
+        const bench_visibility = bench_checkbox.checked ? 'visible' : 'none';
+        
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty('bench-points', 'visibility', bench_visibility);
+      });
+
+      const water_checkbox = document.getElementById('water-toggle');
+
+      // Add event listener for the bench checkbox
+      water_checkbox.addEventListener('change', function() {
+        const water_visibility = water_checkbox.checked ? 'visible' : 'none';
+        
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty('water-points', 'visibility', water_visibility);
+      });
+
     </script>
   </body>
 </html>
