@@ -31,6 +31,7 @@
 
       const waterColor = "#0062ff";
       const toiletColor = "#eb4034";
+      const benchColor = "#dbbf21";
 
       map.on("load", () => {
         map.addSource("water-tiles", {
@@ -51,6 +52,59 @@
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
+        });
+
+        map.addSource("bench-tiles", {
+          type: "vector",
+          tiles: [
+            "https://wrynearson.github.io/watermap/data/bench_tiles/{z}/{x}/{y}.pbf",
+          ], // URL pattern for your .pbf tiles
+          minzoom: 0,
+          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
+          maxzoom: 14,
+        });
+
+        // ADD BENCH TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
+
+        map.addLayer({
+          id: "bench-lines",
+          type: "line", // Change this based on your data type
+          source: "bench-tiles",
+          "source-layer": "lines", // Replace with the actual layer name in your PBF
+          paint: {
+            "line-opacity": 0.5,
+            "line-color": benchColor,
+          },
+        });
+
+        map.addLayer({
+          id: "bench-multipolygons",
+          type: "fill", // Change this based on your data type
+          source: "bench-tiles",
+          "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+          paint: {
+            "fill-opacity": 0.3,
+            "fill-color": benchColor,
+          },
+        });
+
+        map.addLayer({
+          id: "bench-points",
+          type: "circle", // Change this based on your data type
+          source: "bench-tiles",
+          "source-layer": "points", // Replace with the actual layer name in your PBF
+          paint: {
+            "circle-radius": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              10,
+              1,
+              16,
+              2.5,
+            ],
+            "circle-color": benchColor,
+          },
         });
 
         // ADD WATER TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
@@ -151,6 +205,14 @@
           const toilet_coordinates = e.features[0].geometry.coordinates.slice();
           new maplibregl.Popup()
             .setLngLat(toilet_coordinates)
+            .setHTML(e.features[0].properties.osm_id)
+            .addTo(map);
+        });
+
+        map.on("click", "bench-points", (e) => {
+          const bench_coordinates = e.features[0].geometry.coordinates.slice();
+          new maplibregl.Popup()
+            .setLngLat(bench_coordinates)
             .setHTML(e.features[0].properties.osm_id)
             .addTo(map);
         });
