@@ -17,23 +17,74 @@
       #map {
         height: 100%;
       }
+      #toggle-layer {
+        position: absolute;
+        margin: 10px;
+        padding: 4px 8px 4px 8px;
+        border-radius: 12px;
+        z-index: 1;
+        background: rgba(255, 255, 255, 1);
+      }
+      #water-toggle-layer {
+        color: #0062ff
+      }
+      #toilet-toggle-layer {
+        color: #FF7A7A
+      }
+      #bench-toggle-layer {
+        color: #70cc85
+      }
     </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div id="map">
+      <div id="toggle-layer">
+        <div id="water-toggle-layer">
+          <input type="checkbox" id="water-toggle" checked />
+          <label for="water-toggle">
+            Drinking Water
+          </label>
+        </div>
+        <div id="toilet-toggle-layer">
+          <input type="checkbox" id="toilet-toggle" checked />
+          <label for="toilet-toggle">
+            Toilets
+          </label>
+        </div>
+        <div id="bench-toggle-layer">
+          <input type="checkbox" id="bench-toggle"/>
+          <label for="bench-toggle">
+            Benches
+          </label>
+        </div>
+    </div>
     <script>
       var map = new maplibregl.Map({
         container: "map", // container id
         style: "https://tiles.openfreemap.org/styles/positron", // style URL
         center: [8, 46.7], // starting position [lng, lat]
         zoom: 7, // starting zoom
+        antialias: true
       });
 
-      const waterColor = "#0062ff";
-      const toiletColor = "#eb4034";
-      const benchColor = "#dbbf21";
-
+      const waterColor = "#619eff";
+      const toiletColor = "#FF7A7A";
+      const benchColor = "#70cc85";
       map.on("load", () => {
+
+        // Insert the layer beneath any symbol layer.
+        const layers = map.getStyle().layers;
+        console.log("layers", layers)
+
+        let labelLayerId;
+        for (let i = 0; i < layers.length; i++) {
+          if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+              labelLayerId = layers[i].id;
+              console.log(labelLayerId)
+              break;
+            }
+        }
+
         map.addSource("water-tiles", {
           type: "vector",
           tiles: [
@@ -75,7 +126,7 @@
             "line-opacity": 0.5,
             "line-color": benchColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "bench-multipolygons",
@@ -86,7 +137,7 @@
             "fill-opacity": 0.3,
             "fill-color": benchColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "bench-points",
@@ -105,7 +156,7 @@
             ],
             "circle-color": benchColor,
           },
-        });
+        }, labelLayerId);
 
         // ADD WATER TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
@@ -118,7 +169,7 @@
             "line-opacity": 0.5,
             "line-color": waterColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "water-multipolygons",
@@ -129,7 +180,7 @@
             "fill-opacity": 0.3,
             "fill-color": waterColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "water-points",
@@ -148,7 +199,7 @@
             ],
             "circle-color": waterColor,
           },
-        });
+        }, labelLayerId);
 
         // ADD TOILET TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
@@ -161,7 +212,7 @@
             "line-opacity": 0.5,
             "line-color": toiletColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "toilet-multipolygons",
@@ -172,7 +223,7 @@
             "fill-opacity": 0.3,
             "fill-color": toiletColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "toilet-points",
@@ -191,7 +242,11 @@
             ],
             "circle-color": toiletColor,
           },
-        });
+        }, labelLayerId);
+
+        map.setLayoutProperty('water-points', 'visibility', 'visible');
+        map.setLayoutProperty('toilet-points', 'visibility', 'visible');
+        map.setLayoutProperty('bench-points', 'visibility', 'none');
 
         map.on("click", "water-points", (e) => {
           const water_coordinates = e.features[0].geometry.coordinates.slice();
@@ -227,6 +282,45 @@
           trackUserLocation: true,
         })
       );
+
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+      
+      const bench_checkbox = document.getElementById('bench-toggle');
+      
+      // Add event listener for the bench checkbox
+      bench_checkbox.addEventListener('change', function() {
+        const bench_visibility = bench_checkbox.checked ? 'visible' : 'none';
+        
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty('bench-points', 'visibility', bench_visibility);
+        map.setLayoutProperty('bench-lines', 'visibility', bench_visibility);
+        map.setLayoutProperty('bench-multipolygons', 'visibility', bench_visibility);
+      });
+
+      const toilet_checkbox = document.getElementById('toilet-toggle');
+
+      // Add event listener for the bench checkbox
+      toilet_checkbox.addEventListener('change', function() {
+        const toilet_visibility = toilet_checkbox.checked ? 'visible' : 'none';
+        
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty('toilet-points', 'visibility', toilet_visibility);
+        map.setLayoutProperty('toilet-lines', 'visibility', toilet_visibility);
+        map.setLayoutProperty('toilet-multipolygons', 'visibility', toilet_visibility);
+      });
+
+      const water_checkbox = document.getElementById('water-toggle');
+
+      // Add event listener for the bench checkbox
+      water_checkbox.addEventListener('change', function() {
+        const water_visibility = water_checkbox.checked ? 'visible' : 'none';
+        
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty('water-points', 'visibility', water_visibility);
+        map.setLayoutProperty('water-lines', 'visibility', water_visibility);
+        map.setLayoutProperty('water-multipolygons', 'visibility', water_visibility);
+      });
+
     </script>
   </body>
 </html>
