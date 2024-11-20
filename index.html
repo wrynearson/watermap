@@ -19,20 +19,23 @@
       }
       #toggle-layer {
         position: absolute;
-        top: 10px;
-        left: 10px;
+        margin: 10px;
+        padding: 4px 8px 4px 8px;
+        border-radius: 12px;
         z-index: 1;
-        background: rgba(255, 255, 255, 0.8);
-        padding: 5px;
+        background: rgba(255, 255, 255, 1);
+      }
+      #water-toggle {
+        background-color: #0062ff
       }
     </style>
   </head>
   <body>
     <div id="map">
       <div id="toggle-layer">
-        <input type="checkbox" id="water-toggle" checked /> Show Water
-        <input type="checkbox" id="toilet-toggle" checked /> Show Toilets
-        <input type="checkbox" id="bench-toggle" /> Show Benches
+        <input type="checkbox" id="water-toggle" checked /> Drinking Water
+        <input type="checkbox" id="toilet-toggle" checked /> Toilets
+        <input type="checkbox" id="bench-toggle" /> Benches
     </div>
     <script>
       var map = new maplibregl.Map({
@@ -40,13 +43,27 @@
         style: "https://tiles.openfreemap.org/styles/positron", // style URL
         center: [8, 46.7], // starting position [lng, lat]
         zoom: 7, // starting zoom
+        antialias: true
       });
 
-      const waterColor = "#0062ff";
-      const toiletColor = "#eb4034";
-      const benchColor = "#dbbf21";
-
+      const waterColor = "#619eff";
+      const toiletColor = "#FF7A7A";
+      const benchColor = "#8cf8a3";
       map.on("load", () => {
+
+        // Insert the layer beneath any symbol layer.
+        const layers = map.getStyle().layers;
+        console.log("layers", layers)
+
+        let labelLayerId;
+        for (let i = 0; i < layers.length; i++) {
+          if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+              labelLayerId = layers[i].id;
+              console.log(labelLayerId)
+              break;
+            }
+        }
+
         map.addSource("water-tiles", {
           type: "vector",
           tiles: [
@@ -88,7 +105,7 @@
             "line-opacity": 0.5,
             "line-color": benchColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "bench-multipolygons",
@@ -99,7 +116,7 @@
             "fill-opacity": 0.3,
             "fill-color": benchColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "bench-points",
@@ -118,7 +135,7 @@
             ],
             "circle-color": benchColor,
           },
-        });
+        }, labelLayerId);
 
         // ADD WATER TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
@@ -131,7 +148,7 @@
             "line-opacity": 0.5,
             "line-color": waterColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "water-multipolygons",
@@ -142,7 +159,7 @@
             "fill-opacity": 0.3,
             "fill-color": waterColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "water-points",
@@ -161,7 +178,7 @@
             ],
             "circle-color": waterColor,
           },
-        });
+        }, labelLayerId);
 
         // ADD TOILET TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
@@ -174,7 +191,7 @@
             "line-opacity": 0.5,
             "line-color": toiletColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "toilet-multipolygons",
@@ -185,7 +202,7 @@
             "fill-opacity": 0.3,
             "fill-color": toiletColor,
           },
-        });
+        }, labelLayerId);
 
         map.addLayer({
           id: "toilet-points",
@@ -204,7 +221,7 @@
             ],
             "circle-color": toiletColor,
           },
-        });
+        }, labelLayerId);
 
         map.setLayoutProperty('water-points', 'visibility', 'visible');
         map.setLayoutProperty('toilet-points', 'visibility', 'visible');
