@@ -253,6 +253,20 @@
         
         // Toggle the layer visibility based on the checkbox
         map.setLayoutProperty('bench-points', 'visibility', bench_visibility);
+        map.setLayoutProperty('bench-lines', 'visibility', bench_visibility);
+        map.setLayoutProperty('bench-multipolygons', 'visibility', bench_visibility);
+      });
+
+      const toilet_checkbox = document.getElementById('toilet-toggle');
+
+      // Add event listener for the bench checkbox
+      toilet_checkbox.addEventListener('change', function() {
+        const toilet_visibility = toilet_checkbox.checked ? 'visible' : 'none';
+        
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty('toilet-points', 'visibility', toilet_visibility);
+        map.setLayoutProperty('toilet-lines', 'visibility', toilet_visibility);
+        map.setLayoutProperty('toilet-multipolygons', 'visibility', toilet_visibility);
       });
 
       const water_checkbox = document.getElementById('water-toggle');
@@ -263,6 +277,8 @@
         
         // Toggle the layer visibility based on the checkbox
         map.setLayoutProperty('water-points', 'visibility', water_visibility);
+        map.setLayoutProperty('water-lines', 'visibility', water_visibility);
+        map.setLayoutProperty('water-multipolygons', 'visibility', water_visibility);
       });
 
     </script>
