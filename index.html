@@ -21,12 +21,13 @@
         position: absolute;
         margin: 10px;
         padding: 4px 8px 4px 8px;
-        border-radius: 12px;
+        border-radius: 4px;
         z-index: 1;
         background: rgba(255, 255, 255, 1);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, .1);
       }
       #water-toggle-layer {
-        color: #0062ff
+        color: #0062ff;
       }
       #toilet-toggle-layer {
         color: #FF7A7A
@@ -64,7 +65,12 @@
         style: "https://tiles.openfreemap.org/styles/positron", // style URL
         center: [8, 46.7], // starting position [lng, lat]
         zoom: 7, // starting zoom
-        antialias: true
+        maxZoom: 16,
+        maxPitch: 75,
+        attributionControl: {
+          compact: true,
+          customAttribution: ["MapLibre", '<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" rel="noopener noreferrer" target="_blank">Terrain Tiles</a>'] 
+        },
       });
 
       const waterColor = "#619eff";
@@ -74,7 +80,7 @@
 
         // Insert the layer beneath any symbol layer.
         const layers = map.getStyle().layers;
-        console.log("layers", layers)
+        // console.log("layers", layers)
 
         let labelLayerId;
         for (let i = 0; i < layers.length; i++) {
@@ -114,6 +120,30 @@
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
         });
+
+        map.addSource("terrain-source", {
+          type:"raster-dem",
+          tiles: [
+            "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+            ]
+        });
+
+        map.addLayer({
+          id: "hillshade-layer",
+          type: "hillshade",
+          source: "terrain-source",
+          paint:{
+            "hillshade-shadow-color": "#a6a6a6",
+            "hillshade-exaggeration": 0.05,
+          },
+          layout:{ visibility: "visible" },
+          minzoom: 10,
+        });
+
+        map.setTerrain({
+          source: "terrain-source",
+          exaggeration: 0.04
+        })
 
         // ADD BENCH TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
@@ -283,7 +313,17 @@
         })
       );
 
-      map.addControl(new maplibregl.NavigationControl(), "top-right");
+      map.addControl(new maplibregl.NavigationControl({
+        visualizePitch: true,
+      }), "top-right");
+
+      map.addControl(
+        new maplibregl.TerrainControl({
+            source: 'terrain-source',
+            exaggeration: 0.04
+        })
+    );
+
       
       const bench_checkbox = document.getElementById('bench-toggle');
       
