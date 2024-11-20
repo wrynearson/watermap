@@ -25,17 +25,38 @@
         z-index: 1;
         background: rgba(255, 255, 255, 1);
       }
-      #water-toggle {
-        background-color: #0062ff
+      #water-toggle-layer {
+        color: #0062ff
+      }
+      #toilet-toggle-layer {
+        color: #FF7A7A
+      }
+      #bench-toggle-layer {
+        color: #70cc85
       }
     </style>
   </head>
   <body>
     <div id="map">
       <div id="toggle-layer">
-        <input type="checkbox" id="water-toggle" checked /> Drinking Water
-        <input type="checkbox" id="toilet-toggle" checked /> Toilets
-        <input type="checkbox" id="bench-toggle" /> Benches
+        <div id="water-toggle-layer">
+          <input type="checkbox" id="water-toggle" checked />
+          <label for="water-toggle">
+            Drinking Water
+          </label>
+        </div>
+        <div id="toilet-toggle-layer">
+          <input type="checkbox" id="toilet-toggle" checked />
+          <label for="toilet-toggle">
+            Toilets
+          </label>
+        </div>
+        <div id="bench-toggle-layer">
+          <input type="checkbox" id="bench-toggle"/>
+          <label for="bench-toggle">
+            Benches
+          </label>
+        </div>
     </div>
     <script>
       var map = new maplibregl.Map({
