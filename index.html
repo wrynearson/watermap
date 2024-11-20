@@ -261,6 +261,8 @@
           trackUserLocation: true,
         })
       );
+
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
       
       const bench_checkbox = document.getElementById('bench-toggle');
       
