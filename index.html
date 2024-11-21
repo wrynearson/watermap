@@ -137,13 +137,8 @@
             "hillshade-exaggeration": 0.05,
           },
           layout:{ visibility: "visible" },
-          minzoom: 10,
+          minzoom: 9,
         });
-
-        map.setTerrain({
-          source: "terrain-source",
-          exaggeration: 0.04
-        })
 
         // ADD BENCH TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
@@ -313,16 +308,18 @@
         })
       );
 
+      // Add navigation control to the map.
       map.addControl(new maplibregl.NavigationControl({
         visualizePitch: true,
       }), "top-right");
 
+      // Add terrain control to the map.
       map.addControl(
         new maplibregl.TerrainControl({
             source: 'terrain-source',
             exaggeration: 0.04
         })
-    );
+      );
 
       
       const bench_checkbox = document.getElementById('bench-toggle');
