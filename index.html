@@ -55,7 +55,7 @@
         <div id="bench-toggle-layer">
           <input type="checkbox" id="bench-toggle"/>
           <label for="bench-toggle">
-            Benches
+            Benches (only Switzerland)
           </label>
         </div>
     </div>
@@ -64,7 +64,7 @@
         container: "map", // container id
         style: "https://tiles.openfreemap.org/styles/positron", // style URL
         center: [8, 46.7], // starting position [lng, lat]
-        zoom: 7, // starting zoom
+        zoom: 4, // starting zoom
         maxZoom: 16,
         maxPitch: 75,
         attributionControl: {
@@ -94,7 +94,7 @@
         map.addSource("water-tiles", {
           type: "vector",
           tiles: [
-            "https://raw.githubusercontent.com/wrynearson/watermap/48ab1b45649876c79a2f33cf5c5a14cf284c18e1/data/water_europe/{z}/{x}/{y}.pbf",
+            "https://raw.githubusercontent.com/wrynearson/watermap/1b7179e161ca96a70049dda74435ab7d2dcf7c13/data/europe_water/{z}/{x}/{y}.pbf",
           ], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
@@ -104,7 +104,7 @@
         map.addSource("toilet-tiles", {
           type: "vector",
           tiles: [
-            "https://wrynearson.github.io/watermap/data/toilet_tiles/{z}/{x}/{y}.pbf",
+            "https://raw.githubusercontent.com/wrynearson/watermap/1b7179e161ca96a70049dda74435ab7d2dcf7c13/data/europe_toilets/{z}/{x}/{y}.pbf",
           ], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
@@ -320,7 +320,6 @@
             exaggeration: 0.04
         })
       );
-      
       
       const bench_checkbox = document.getElementById('bench-toggle');
       
