@@ -94,7 +94,7 @@
         map.addSource("water-tiles", {
           type: "vector",
           tiles: [
-            "https://wrynearson.github.io/watermap/data/water_tiles/{z}/{x}/{y}.pbf",
+            "/data/water_europe/{z}/{x}/{y}.pbf",
           ], // URL pattern for your .pbf tiles
           minzoom: 0,
           // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
@@ -320,7 +320,7 @@
             exaggeration: 0.04
         })
       );
-
+      
       
       const bench_checkbox = document.getElementById('bench-toggle');
       
