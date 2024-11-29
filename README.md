@@ -6,7 +6,7 @@ Drinking water, plus toilets and benches, on a 3D map using data from [OpenStree
 
 <img width="1818" alt="image" src="https://github.com/user-attachments/assets/5970608d-1ee6-42f9-a4c7-986019b9a29e">
 
-_Currently limited to Switzerland_.
+_Water and toilets are currently limited to Europe, and benches are currently limited to Switzerland_.
 
 ## Features
 1. See drinking water, toilets and benches easily
