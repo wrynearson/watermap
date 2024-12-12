@@ -2,7 +2,7 @@
 
 https://wrynearson.github.io/watermap/
 
-Drinking water, plus toilets and benches, on a 3D map using data from [OpenStreetMap](https://www.openstreetmap.org/).
+Drinking water, plus toilets and benches, on a 3D map using data from [OpenStreetMap](https://www.openstreetmap.org/). For more information, see [this post](https://wrynearson.github.io/watermap-project/).
 
 <img width="1818" alt="image" src="https://github.com/user-attachments/assets/5970608d-1ee6-42f9-a4c7-986019b9a29e">
 
