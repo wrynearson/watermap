@@ -173,7 +173,9 @@
 
         map.addSource("sac-tiles", {
           type: "vector",
-          tiles: ["https://willwill.blog/watermap/data/sac/{z}/{x}/{y}.pbf"], // URL pattern for your .pbf tiles (remove leading dot)
+          tiles: [
+            "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/feature/add-sac-scale-paths/data/sac/{z}/{x}/{y}.pbf",
+          ], // URL pattern for your .pbf tiles (remove leading dot)
           minzoom: 0,
           maxzoom: 14,
         });
@@ -373,11 +375,11 @@
                 "demanding_mountain_hiking",
                 "#e67e22",
                 "alpine_hiking",
-                "#e74c3c",
+                "#5588ff",
                 "demanding_alpine_hiking",
-                "#c0392b",
+                "#3701b5",
                 "difficult_alpine_hiking",
-                "#8e44ad",
+                "#fb0aff",
                 "#bdc3c7", // default color
               ],
             },
