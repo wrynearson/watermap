@@ -24,16 +24,41 @@
         border-radius: 4px;
         z-index: 1;
         background: rgba(255, 255, 255, 1);
-        box-shadow: 0 0 0 2px rgba(0, 0, 0, .1);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
       }
       #water-toggle-layer {
         color: #0062ff;
       }
       #toilet-toggle-layer {
-        color: #FF7A7A
+        color: #ff7a7a;
       }
       #bench-toggle-layer {
-        color: #70cc85
+        color: #70cc85;
+      }
+      #sac-toggle-layer {
+        color: #ff9900;
+      }
+
+      /* Add legend for SAC scales */
+      #legend {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px;
+        border-radius: 4px;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+      }
+      .legend-item {
+        margin: 5px 0;
+        font-size: 12px;
+      }
+      .legend-color {
+        display: inline-block;
+        width: 15px;
+        height: 3px;
+        margin-right: 5px;
       }
     </style>
   </head>
@@ -42,22 +67,44 @@
       <div id="toggle-layer">
         <div id="water-toggle-layer">
           <input type="checkbox" id="water-toggle" checked />
-          <label for="water-toggle">
-            Drinking Water
-          </label>
+          <label for="water-toggle"> Drinking Water </label>
         </div>
         <div id="toilet-toggle-layer">
           <input type="checkbox" id="toilet-toggle" checked />
-          <label for="toilet-toggle">
-            Toilets
-          </label>
+          <label for="toilet-toggle"> Toilets </label>
         </div>
         <div id="bench-toggle-layer">
-          <input type="checkbox" id="bench-toggle"/>
-          <label for="bench-toggle">
-            Benches (only Switzerland)
-          </label>
+          <input type="checkbox" id="bench-toggle" />
+          <label for="bench-toggle"> Benches (only Switzerland) </label>
         </div>
+        <div id="sac-toggle-layer">
+          <input type="checkbox" id="sac-toggle" />
+          <label for="sac-toggle"> SAC difficulty (only Switzerland) </label>
+        </div>
+      </div>
+
+      <!-- Add legend div -->
+      <div id="legend" style="display: none">
+        <h4 style="margin: 0 0 5px 0">SAC Scale</h4>
+        <div class="legend-item">
+          <span class="legend-color" style="background: #2ecc71"></span>T1
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: #f1c40f"></span>T2
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: #e67e22"></span>T3
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: #5588ff"></span>T4
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: #3701b5"></span>T5
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: #fb0aff"></span>T6
+        </div>
+      </div>
     </div>
     <script>
       var map = new maplibregl.Map({
@@ -69,26 +116,29 @@
         maxPitch: 75,
         attributionControl: {
           compact: true,
-          customAttribution: ["MapLibre", '<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" rel="noopener noreferrer" target="_blank">Terrain Tiles</a>'] 
+          customAttribution: [
+            "MapLibre",
+            '<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" rel="noopener noreferrer" target="_blank">Terrain Tiles</a>',
+          ],
         },
       });
 
       const waterColor = "#619eff";
       const toiletColor = "#FF7A7A";
       const benchColor = "#70cc85";
-      map.on("load", () => {
 
+      map.on("load", () => {
         // Insert the layer beneath any symbol layer.
         const layers = map.getStyle().layers;
         // console.log("layers", layers)
 
         let labelLayerId;
         for (let i = 0; i < layers.length; i++) {
-          if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
-              labelLayerId = layers[i].id;
-              console.log(labelLayerId)
-              break;
-            }
+          if (layers[i].type === "symbol" && layers[i].layout["text-field"]) {
+            labelLayerId = layers[i].id;
+            console.log(labelLayerId);
+            break;
+          }
         }
 
         map.addSource("water-tiles", {
@@ -121,157 +171,224 @@
           maxzoom: 14,
         });
 
+        map.addSource("sac-tiles", {
+          type: "vector",
+          tiles: ["https://willwill.blog/watermap/data/sac/{z}/{x}/{y}.pbf"], // URL pattern for your .pbf tiles (remove leading dot)
+          minzoom: 0,
+          maxzoom: 14,
+        });
+
         map.addSource("terrain-source", {
-          type:"raster-dem",
+          type: "raster-dem",
           tiles: [
             "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-            ]
+          ],
         });
 
         map.addLayer({
           id: "hillshade-layer",
           type: "hillshade",
           source: "terrain-source",
-          paint:{
+          paint: {
             "hillshade-shadow-color": "#a6a6a6",
             "hillshade-exaggeration": 0.05,
           },
-          layout:{ visibility: "visible" },
+          layout: { visibility: "visible" },
           minzoom: 9,
         });
 
         // ADD BENCH TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
-        map.addLayer({
-          id: "bench-lines",
-          type: "line", // Change this based on your data type
-          source: "bench-tiles",
-          "source-layer": "lines", // Replace with the actual layer name in your PBF
-          paint: {
-            "line-opacity": 0.5,
-            "line-color": benchColor,
+        map.addLayer(
+          {
+            id: "bench-lines",
+            type: "line", // Change this based on your data type
+            source: "bench-tiles",
+            "source-layer": "lines", // Replace with the actual layer name in your PBF
+            paint: {
+              "line-opacity": 0.5,
+              "line-color": benchColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.addLayer({
-          id: "bench-multipolygons",
-          type: "fill", // Change this based on your data type
-          source: "bench-tiles",
-          "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
-          paint: {
-            "fill-opacity": 0.3,
-            "fill-color": benchColor,
+        map.addLayer(
+          {
+            id: "bench-multipolygons",
+            type: "fill", // Change this based on your data type
+            source: "bench-tiles",
+            "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+            paint: {
+              "fill-opacity": 0.3,
+              "fill-color": benchColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.addLayer({
-          id: "bench-points",
-          type: "circle", // Change this based on your data type
-          source: "bench-tiles",
-          "source-layer": "points", // Replace with the actual layer name in your PBF
-          paint: {
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              10,
-              1,
-              16,
-              2.5,
-            ],
-            "circle-color": benchColor,
+        map.addLayer(
+          {
+            id: "bench-points",
+            type: "circle", // Change this based on your data type
+            source: "bench-tiles",
+            "source-layer": "points", // Replace with the actual layer name in your PBF
+            paint: {
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                10,
+                1,
+                16,
+                2.5,
+              ],
+              "circle-color": benchColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
         // ADD WATER TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
-        map.addLayer({
-          id: "water-lines",
-          type: "line", // Change this based on your data type
-          source: "water-tiles",
-          "source-layer": "lines", // Replace with the actual layer name in your PBF
-          paint: {
-            "line-opacity": 0.5,
-            "line-color": waterColor,
+        map.addLayer(
+          {
+            id: "water-lines",
+            type: "line", // Change this based on your data type
+            source: "water-tiles",
+            "source-layer": "lines", // Replace with the actual layer name in your PBF
+            paint: {
+              "line-opacity": 0.5,
+              "line-color": waterColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.addLayer({
-          id: "water-multipolygons",
-          type: "fill", // Change this based on your data type
-          source: "water-tiles",
-          "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
-          paint: {
-            "fill-opacity": 0.3,
-            "fill-color": waterColor,
+        map.addLayer(
+          {
+            id: "water-multipolygons",
+            type: "fill", // Change this based on your data type
+            source: "water-tiles",
+            "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+            paint: {
+              "fill-opacity": 0.3,
+              "fill-color": waterColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.addLayer({
-          id: "water-points",
-          type: "circle", // Change this based on your data type
-          source: "water-tiles",
-          "source-layer": "points", // Replace with the actual layer name in your PBF
-          paint: {
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              10,
-              1.5,
-              16,
-              4,
-            ],
-            "circle-color": waterColor,
+        map.addLayer(
+          {
+            id: "water-points",
+            type: "circle", // Change this based on your data type
+            source: "water-tiles",
+            "source-layer": "points", // Replace with the actual layer name in your PBF
+            paint: {
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                10,
+                1.5,
+                16,
+                4,
+              ],
+              "circle-color": waterColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
         // ADD TOILET TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
 
-        map.addLayer({
-          id: "toilet-lines",
-          type: "line", // Change this based on your data type
-          source: "toilet-tiles",
-          "source-layer": "lines", // Replace with the actual layer name in your PBF
-          paint: {
-            "line-opacity": 0.5,
-            "line-color": toiletColor,
+        map.addLayer(
+          {
+            id: "toilet-lines",
+            type: "line", // Change this based on your data type
+            source: "toilet-tiles",
+            "source-layer": "lines", // Replace with the actual layer name in your PBF
+            paint: {
+              "line-opacity": 0.5,
+              "line-color": toiletColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.addLayer({
-          id: "toilet-multipolygons",
-          type: "fill", // Change this based on your data type
-          source: "toilet-tiles",
-          "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
-          paint: {
-            "fill-opacity": 0.3,
-            "fill-color": toiletColor,
+        map.addLayer(
+          {
+            id: "toilet-multipolygons",
+            type: "fill", // Change this based on your data type
+            source: "toilet-tiles",
+            "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+            paint: {
+              "fill-opacity": 0.3,
+              "fill-color": toiletColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.addLayer({
-          id: "toilet-points",
-          type: "circle", // Change this based on your data type
-          source: "toilet-tiles",
-          "source-layer": "points", // Replace with the actual layer name in your PBF
-          paint: {
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              10,
-              1.5,
-              16,
-              4,
-            ],
-            "circle-color": toiletColor,
+        map.addLayer(
+          {
+            id: "toilet-points",
+            type: "circle", // Change this based on your data type
+            source: "toilet-tiles",
+            "source-layer": "points", // Replace with the actual layer name in your PBF
+            paint: {
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                10,
+                1.5,
+                16,
+                4,
+              ],
+              "circle-color": toiletColor,
+            },
           },
-        }, labelLayerId);
+          labelLayerId
+        );
 
-        map.setLayoutProperty('water-points', 'visibility', 'visible');
-        map.setLayoutProperty('toilet-points', 'visibility', 'visible');
-        map.setLayoutProperty('bench-points', 'visibility', 'none');
+        // ADD SAC TILES WITH COLOR-CODED DIFFICULTIES
+        map.addLayer(
+          {
+            id: "sac",
+            type: "line",
+            source: "sac-tiles",
+            "source-layer": "sac",
+            paint: {
+              "line-opacity": 0.8,
+              "line-width": 2,
+              "line-color": [
+                "match",
+                ["get", "sac_scale"],
+                "hiking",
+                "#2ecc71",
+                "mountain_hiking",
+                "#f1c40f",
+                "demanding_mountain_hiking",
+                "#e67e22",
+                "alpine_hiking",
+                "#e74c3c",
+                "demanding_alpine_hiking",
+                "#c0392b",
+                "difficult_alpine_hiking",
+                "#8e44ad",
+                "#bdc3c7", // default color
+              ],
+            },
+          },
+          labelLayerId
+        );
+
+        map.setLayoutProperty("water-points", "visibility", "visible");
+        map.setLayoutProperty("toilet-points", "visibility", "visible");
+        map.setLayoutProperty("bench-points", "visibility", "none");
+        map.setLayoutProperty("sac", "visibility", "none");
 
         map.on("click", "water-points", (e) => {
           const water_coordinates = e.features[0].geometry.coordinates.slice();
@@ -296,6 +413,26 @@
             .setHTML(e.features[0].properties.osm_id)
             .addTo(map);
         });
+
+        // Add click handler for SAC paths
+        map.on("click", "sac", (e) => {
+          const properties = e.features[0].properties;
+          const popupContent = `
+            <strong>SAC Scale:</strong> ${
+              properties.sac_scale || "Not specified"
+            }<br>
+            ${
+              properties.name
+                ? `<strong>Name:</strong> ${properties.name}<br>`
+                : ""
+            }
+            <strong>OSM ID:</strong> ${properties.osm_id}
+          `;
+          new maplibregl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(popupContent)
+            .addTo(map);
+        });
       });
 
       // Add geolocate control to the map.
@@ -309,54 +446,81 @@
       );
 
       // Add navigation control to the map.
-      map.addControl(new maplibregl.NavigationControl({
-        visualizePitch: true,
-      }), "top-right");
+      map.addControl(
+        new maplibregl.NavigationControl({
+          visualizePitch: true,
+        }),
+        "top-right"
+      );
 
       // Add terrain control to the map.
       map.addControl(
         new maplibregl.TerrainControl({
-            source: 'terrain-source',
-            exaggeration: 0.04
+          source: "terrain-source",
+          exaggeration: 0.04,
         })
       );
-      
-      const bench_checkbox = document.getElementById('bench-toggle');
-      
-      // Add event listener for the bench checkbox
-      bench_checkbox.addEventListener('change', function() {
-        const bench_visibility = bench_checkbox.checked ? 'visible' : 'none';
-        
-        // Toggle the layer visibility based on the checkbox
-        map.setLayoutProperty('bench-points', 'visibility', bench_visibility);
-        map.setLayoutProperty('bench-lines', 'visibility', bench_visibility);
-        map.setLayoutProperty('bench-multipolygons', 'visibility', bench_visibility);
-      });
 
-      const toilet_checkbox = document.getElementById('toilet-toggle');
+      const bench_checkbox = document.getElementById("bench-toggle");
 
       // Add event listener for the bench checkbox
-      toilet_checkbox.addEventListener('change', function() {
-        const toilet_visibility = toilet_checkbox.checked ? 'visible' : 'none';
-        
+      bench_checkbox.addEventListener("change", function () {
+        const bench_visibility = bench_checkbox.checked ? "visible" : "none";
+
         // Toggle the layer visibility based on the checkbox
-        map.setLayoutProperty('toilet-points', 'visibility', toilet_visibility);
-        map.setLayoutProperty('toilet-lines', 'visibility', toilet_visibility);
-        map.setLayoutProperty('toilet-multipolygons', 'visibility', toilet_visibility);
+        map.setLayoutProperty("bench-points", "visibility", bench_visibility);
+        map.setLayoutProperty("bench-lines", "visibility", bench_visibility);
+        map.setLayoutProperty(
+          "bench-multipolygons",
+          "visibility",
+          bench_visibility
+        );
       });
 
-      const water_checkbox = document.getElementById('water-toggle');
+      const toilet_checkbox = document.getElementById("toilet-toggle");
 
       // Add event listener for the bench checkbox
-      water_checkbox.addEventListener('change', function() {
-        const water_visibility = water_checkbox.checked ? 'visible' : 'none';
-        
+      toilet_checkbox.addEventListener("change", function () {
+        const toilet_visibility = toilet_checkbox.checked ? "visible" : "none";
+
         // Toggle the layer visibility based on the checkbox
-        map.setLayoutProperty('water-points', 'visibility', water_visibility);
-        map.setLayoutProperty('water-lines', 'visibility', water_visibility);
-        map.setLayoutProperty('water-multipolygons', 'visibility', water_visibility);
+        map.setLayoutProperty("toilet-points", "visibility", toilet_visibility);
+        map.setLayoutProperty("toilet-lines", "visibility", toilet_visibility);
+        map.setLayoutProperty(
+          "toilet-multipolygons",
+          "visibility",
+          toilet_visibility
+        );
       });
 
+      const water_checkbox = document.getElementById("water-toggle");
+
+      // Add event listener for the bench checkbox
+      water_checkbox.addEventListener("change", function () {
+        const water_visibility = water_checkbox.checked ? "visible" : "none";
+
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty("water-points", "visibility", water_visibility);
+        map.setLayoutProperty("water-lines", "visibility", water_visibility);
+        map.setLayoutProperty(
+          "water-multipolygons",
+          "visibility",
+          water_visibility
+        );
+      });
+
+      const sac_checkbox = document.getElementById("sac-toggle");
+
+      // Add event listener for the SAC checkbox
+      sac_checkbox.addEventListener("change", function () {
+        const sac_visibility = sac_checkbox.checked ? "visible" : "none";
+        // Toggle the layer visibility based on the checkbox
+        map.setLayoutProperty("sac", "visibility", sac_visibility);
+        // Toggle legend visibility
+        document.getElementById("legend").style.display = sac_checkbox.checked
+          ? "block"
+          : "none";
+      });
     </script>
   </body>
 </html>
