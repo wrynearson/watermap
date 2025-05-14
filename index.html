@@ -43,12 +43,42 @@
       #legend {
         position: absolute;
         bottom: 20px;
-        right: 20px;
+        left: 20px;
         padding: 10px;
         border-radius: 4px;
         z-index: 1;
         background: rgba(255, 255, 255, 0.9);
         box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        overflow: visible;
+      }
+      #legend-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+        cursor: pointer;
+      }
+      #legend-header h4 {
+        margin: 0;
+      }
+      #legend-content {
+        overflow: visible;
+        transition: max-height 0.3s ease-out;
+        max-height: 300px;
+      }
+      #legend-content.collapsed {
+        max-height: 0;
+      }
+      .collapse-button {
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 0 4px;
+        color: #666;
+      }
+      .collapse-button:hover {
+        color: #000;
       }
       .legend-item {
         margin: 5px 0;
@@ -59,6 +89,34 @@
         width: 15px;
         height: 3px;
         margin-right: 5px;
+      }
+      .legend-item {
+        position: relative;
+        cursor: help;
+      }
+      .legend-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        font-size: 11px;
+        max-width: 200px;
+        width: max-content;
+        white-space: normal;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 2;
+        text-align: center;
+      }
+      .legend-item:hover::after {
+        visibility: visible;
+        opacity: 1;
       }
     </style>
   </head>
@@ -120,24 +178,29 @@
       // Generate legend content
       const legend = document.getElementById("legend");
       legend.innerHTML = `
-        <h4 style="margin: 0 0 5px 0">SAC Scale</h4>
-        <div class="legend-item">
+        <div id="legend-header">
+          <h4>SAC Scale</h4>
+          <button class="collapse-button" aria-label="Toggle legend">-</button>
+        </div>
+        <div id="legend-content">
+          <div class="legend-item" data-tooltip="Well maintained trails suitable for beginners. No exposure to falling hazards.">
           <span class="legend-color" style="background: ${sacColors.t1}"></span>T1 - Hiking
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-tooltip="Trails may be steep and narrow. Basic surefootedness required.">
           <span class="legend-color" style="background: ${sacColors.t2}"></span>T2 - Mountain Hiking
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-tooltip="Exposed sections may require use of hands. Good surefootedness essential.">
           <span class="legend-color" style="background: ${sacColors.t3}"></span>T3 - Demanding Mountain
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-tooltip="Sometimes requires climbing. Experience with exposed terrain needed.">
           <span class="legend-color" style="background: ${sacColors.t4}"></span>T4 - Alpine Hiking
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-tooltip="Difficult climbing sections. Advanced alpine experience required.">
           <span class="legend-color" style="background: ${sacColors.t5}"></span>T5 - Demanding Alpine
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-tooltip="Most difficult terrain. Expert climbing skills essential.">
           <span class="legend-color" style="background: ${sacColors.t6}"></span>T6 - Difficult Alpine
+          </div>
         </div>
       `;
 
@@ -519,9 +582,24 @@
         );
       });
 
+      // Initialize legend
+      const legendHeader = document.getElementById("legend-header");
+      const legendContent = document.getElementById("legend-content");
+      const collapseButton = document.querySelector(".collapse-button");
+
+      // Add collapse functionality to legend
+      legendHeader.addEventListener("click", function () {
+        legendContent.classList.toggle("collapsed");
+        collapseButton.textContent = legendContent.classList.contains(
+          "collapsed"
+        )
+          ? "+"
+          : "-";
+      });
+
       const sac_checkbox = document.getElementById("sac-toggle");
 
-      // Add event listener for the SAC checkbox
+      // Add event listener for the SAC checkbox and expand legend by default
       sac_checkbox.addEventListener("change", function () {
         const sac_visibility = sac_checkbox.checked ? "visible" : "none";
         // Toggle the layer visibility based on the checkbox
