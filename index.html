@@ -83,28 +83,7 @@
         </div>
       </div>
 
-      <!-- Add legend div -->
-      <div id="legend" style="display: none">
-        <h4 style="margin: 0 0 5px 0">SAC Scale</h4>
-        <div class="legend-item">
-          <span class="legend-color" style="background: #2ecc71"></span>T1
-        </div>
-        <div class="legend-item">
-          <span class="legend-color" style="background: #f1c40f"></span>T2
-        </div>
-        <div class="legend-item">
-          <span class="legend-color" style="background: #e67e22"></span>T3
-        </div>
-        <div class="legend-item">
-          <span class="legend-color" style="background: #5588ff"></span>T4
-        </div>
-        <div class="legend-item">
-          <span class="legend-color" style="background: #3701b5"></span>T5
-        </div>
-        <div class="legend-item">
-          <span class="legend-color" style="background: #fb0aff"></span>T6
-        </div>
-      </div>
+      <div id="legend" style="display: none"></div>
     </div>
     <script>
       var map = new maplibregl.Map({
@@ -127,6 +106,41 @@
       const toiletColor = "#FF7A7A";
       const benchColor = "#70cc85";
 
+      // SAC scale colors
+      const sacColors = {
+        t1: "#f1c40f", // hiking
+        t2: "#f1c40f", // mountain_hiking
+        t3: "#EB3A20", // demanding_mountain_hiking
+        t4: "#0622F6", // alpine_hiking
+        t5: "#697AF9", // demanding_alpine_hiking
+        t6: "#B4BCFC", // difficult_alpine_hiking
+        default: "#bdc3c7", // default color
+      };
+
+      // Generate legend content
+      const legend = document.getElementById("legend");
+      legend.innerHTML = `
+        <h4 style="margin: 0 0 5px 0">SAC Scale</h4>
+        <div class="legend-item">
+          <span class="legend-color" style="background: ${sacColors.t1}"></span>T1 - Hiking
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: ${sacColors.t2}"></span>T2 - Mountain Hiking
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: ${sacColors.t3}"></span>T3 - Demanding Mountain
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: ${sacColors.t4}"></span>T4 - Alpine Hiking
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: ${sacColors.t5}"></span>T5 - Demanding Alpine
+        </div>
+        <div class="legend-item">
+          <span class="legend-color" style="background: ${sacColors.t6}"></span>T6 - Difficult Alpine
+        </div>
+      `;
+
       map.on("load", () => {
         // Insert the layer beneath any symbol layer.
         const layers = map.getStyle().layers;
@@ -145,9 +159,8 @@
           type: "vector",
           tiles: [
             "https://willwill.blog/watermap/data/europe_water/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles
+          ],
           minzoom: 0,
-          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
         });
 
@@ -155,9 +168,8 @@
           type: "vector",
           tiles: [
             "https://willwill.blog/watermap/data/europe_toilets/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles
+          ],
           minzoom: 0,
-          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
         });
 
@@ -165,9 +177,8 @@
           type: "vector",
           tiles: [
             "https://willwill.blog/watermap/data/bench_tiles/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles
+          ],
           minzoom: 0,
-          // match this to the max zoom levels of tiles generated, in the tippecanoe output or z folder list
           maxzoom: 14,
         });
 
@@ -175,7 +186,7 @@
           type: "vector",
           tiles: [
             "https://raw.githubusercontent.com/wrynearson/watermap/refs/heads/feature/add-sac-scale-paths/data/sac/{z}/{x}/{y}.pbf",
-          ], // URL pattern for your .pbf tiles (remove leading dot)
+          ],
           minzoom: 0,
           maxzoom: 14,
         });
@@ -200,13 +211,12 @@
         });
 
         // ADD BENCH TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
-
         map.addLayer(
           {
             id: "bench-lines",
-            type: "line", // Change this based on your data type
+            type: "line",
             source: "bench-tiles",
-            "source-layer": "lines", // Replace with the actual layer name in your PBF
+            "source-layer": "lines",
             paint: {
               "line-opacity": 0.5,
               "line-color": benchColor,
@@ -218,9 +228,9 @@
         map.addLayer(
           {
             id: "bench-multipolygons",
-            type: "fill", // Change this based on your data type
+            type: "fill",
             source: "bench-tiles",
-            "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+            "source-layer": "multipolygons",
             paint: {
               "fill-opacity": 0.3,
               "fill-color": benchColor,
@@ -232,9 +242,9 @@
         map.addLayer(
           {
             id: "bench-points",
-            type: "circle", // Change this based on your data type
+            type: "circle",
             source: "bench-tiles",
-            "source-layer": "points", // Replace with the actual layer name in your PBF
+            "source-layer": "points",
             paint: {
               "circle-radius": [
                 "interpolate",
@@ -251,14 +261,13 @@
           labelLayerId
         );
 
-        // ADD WATER TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
-
+        // ADD WATER TILES AS SEPARATE LAYERS
         map.addLayer(
           {
             id: "water-lines",
-            type: "line", // Change this based on your data type
+            type: "line",
             source: "water-tiles",
-            "source-layer": "lines", // Replace with the actual layer name in your PBF
+            "source-layer": "lines",
             paint: {
               "line-opacity": 0.5,
               "line-color": waterColor,
@@ -270,9 +279,9 @@
         map.addLayer(
           {
             id: "water-multipolygons",
-            type: "fill", // Change this based on your data type
+            type: "fill",
             source: "water-tiles",
-            "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+            "source-layer": "multipolygons",
             paint: {
               "fill-opacity": 0.3,
               "fill-color": waterColor,
@@ -284,9 +293,9 @@
         map.addLayer(
           {
             id: "water-points",
-            type: "circle", // Change this based on your data type
+            type: "circle",
             source: "water-tiles",
-            "source-layer": "points", // Replace with the actual layer name in your PBF
+            "source-layer": "points",
             paint: {
               "circle-radius": [
                 "interpolate",
@@ -303,14 +312,13 @@
           labelLayerId
         );
 
-        // ADD TOILET TILES AS SEPARATE LAYERS – ONE FOR EACH GEOMETRY TYPE
-
+        // ADD TOILET TILES AS SEPARATE LAYERS
         map.addLayer(
           {
             id: "toilet-lines",
-            type: "line", // Change this based on your data type
+            type: "line",
             source: "toilet-tiles",
-            "source-layer": "lines", // Replace with the actual layer name in your PBF
+            "source-layer": "lines",
             paint: {
               "line-opacity": 0.5,
               "line-color": toiletColor,
@@ -322,9 +330,9 @@
         map.addLayer(
           {
             id: "toilet-multipolygons",
-            type: "fill", // Change this based on your data type
+            type: "fill",
             source: "toilet-tiles",
-            "source-layer": "multipolygons", // Replace with the actual layer name in your PBF
+            "source-layer": "multipolygons",
             paint: {
               "fill-opacity": 0.3,
               "fill-color": toiletColor,
@@ -336,9 +344,9 @@
         map.addLayer(
           {
             id: "toilet-points",
-            type: "circle", // Change this based on your data type
+            type: "circle",
             source: "toilet-tiles",
-            "source-layer": "points", // Replace with the actual layer name in your PBF
+            "source-layer": "points",
             paint: {
               "circle-radius": [
                 "interpolate",
@@ -369,18 +377,18 @@
                 "match",
                 ["get", "sac_scale"],
                 "hiking",
-                "#2ecc71",
+                sacColors.t1,
                 "mountain_hiking",
-                "#f1c40f",
+                sacColors.t2,
                 "demanding_mountain_hiking",
-                "#e67e22",
+                sacColors.t3,
                 "alpine_hiking",
-                "#5588ff",
+                sacColors.t4,
                 "demanding_alpine_hiking",
-                "#3701b5",
+                sacColors.t5,
                 "difficult_alpine_hiking",
-                "#fb0aff",
-                "#bdc3c7", // default color
+                sacColors.t6,
+                sacColors.default,
               ],
             },
           },
